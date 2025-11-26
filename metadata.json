@@ -1,0 +1,5 @@
+{
+  "name": "Isometric City Cost Index",
+  "description": "A 3D isometric visualization of cost of living data across US cities, featuring scroll-driven Z-axis navigation.",
+  "requestFramePermissions": []
+}
