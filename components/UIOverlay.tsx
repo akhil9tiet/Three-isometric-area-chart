@@ -1,14 +1,15 @@
 import React from 'react';
-import { CitySeries } from '../types';
+import { CitySeries, TooltipData } from '../types';
 
 interface UIOverlayProps {
   data: CitySeries[];
   activeIndex: number;
   currentMode: 'cities' | 'stocks';
   onModeChange: (mode: 'cities' | 'stocks') => void;
+  tooltip: TooltipData | null;
 }
 
-const UIOverlay: React.FC<UIOverlayProps> = ({ data, activeIndex, currentMode, onModeChange }) => {
+const UIOverlay: React.FC<UIOverlayProps> = ({ data, activeIndex, currentMode, onModeChange, tooltip }) => {
   const isCities = currentMode === 'cities';
 
   return (
@@ -93,6 +94,29 @@ const UIOverlay: React.FC<UIOverlayProps> = ({ data, activeIndex, currentMode, o
         <p>Data Source: {isCities ? 'Historical Index Analysis' : 'Split-Adjusted Market Close'}</p>
         <p>Visualization: WebGL / React Three Fiber</p>
       </div>
+
+      {/* Tooltip */}
+      {tooltip && tooltip.visible && (
+        <div 
+          className="absolute pointer-events-none bg-slate-900/90 border border-slate-700 p-3 rounded-lg shadow-xl backdrop-blur-sm z-50 transform -translate-x-1/2 -translate-y-full mt-[-10px]"
+          style={{ 
+            left: tooltip.x, 
+            top: tooltip.y 
+          }}
+        >
+          <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">
+            {tooltip.city}
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-bold text-white">
+              {tooltip.value.toLocaleString()}
+            </span>
+            <span className="text-xs text-slate-500">
+              {tooltip.year}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

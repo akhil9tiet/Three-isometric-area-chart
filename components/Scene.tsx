@@ -4,7 +4,7 @@ import { OrthographicCamera, Environment, Grid } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import CityChart from './CityChart';
-import { CitySeries } from '../types';
+import { CitySeries, TooltipData } from '../types';
 import { CHART_CONFIG } from '../utils/dataUtils';
 
 interface SceneProps {
@@ -16,13 +16,15 @@ interface SceneProps {
     xDomain: [number, number];
     yDomain: [number, number];
   };
+  onTooltip: (data: TooltipData | null) => void;
 }
 
 const AnimatedGroup: React.FC<{ 
   data: CitySeries[]; 
   activeIndex: number;
   scales: SceneProps['scales'];
-}> = ({ data, activeIndex, scales }) => {
+  onTooltip: (data: TooltipData | null) => void;
+}> = ({ data, activeIndex, scales, onTooltip }) => {
   const groupRef = useRef<THREE.Group>(null);
   
   useFrame((state, delta) => {
@@ -50,23 +52,24 @@ const AnimatedGroup: React.FC<{
           xScale={scales.xScale}
           yScale={scales.yScale}
           xDomain={scales.xDomain}
+          onTooltip={onTooltip}
         />
       ))}
     </group>
   );
 };
 
-const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales }) => {
+const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip }) => {
   return (
     <Canvas shadows dpr={[1, 2]}>
-      {/* Isometric Camera View */}
+      {/* Isometric Camera View - Adjusted for a more horizontal angle */}
       <OrthographicCamera
         makeDefault
-        position={[20, 12, 20]}
+        position={[20, 16, 20]}
         zoom={55}
         near={-50}
         far={200}
-        onUpdate={(c) => c.lookAt(0, 3, 0)}
+        onUpdate={(c) => c.lookAt(0, 0, 0)}
       />
 
       <color attach="background" args={['#0f172a']} />
@@ -83,7 +86,12 @@ const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales }) => {
       {/* Environment reflections */}
       <Environment preset="city" />
 
-      <AnimatedGroup data={data} activeIndex={activeIndex} scales={scales} />
+      <AnimatedGroup 
+        data={data} 
+        activeIndex={activeIndex} 
+        scales={scales} 
+        onTooltip={onTooltip} 
+      />
       
       {/* Post Processing for Glow */}
       <EffectComposer enableNormalPass={false}>

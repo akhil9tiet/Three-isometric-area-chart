@@ -15,3 +15,12 @@ export interface Dimensions {
   height: number;
   depth: number;
 }
+
+export interface TooltipData {
+  x: number;
+  y: number;
+  value: number;
+  year: number;
+  city: string;
+  visible: boolean;
+}

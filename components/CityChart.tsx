@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
-import { CitySeries } from '../types';
+import { CitySeries, TooltipData } from '../types';
 import { CHART_CONFIG } from '../utils/dataUtils';
+import * as d3 from 'd3';
 
 interface CityChartProps {
   series: CitySeries;
@@ -11,9 +13,31 @@ interface CityChartProps {
   xScale: any;
   yScale: any;
   xDomain: [number, number];
+  onTooltip: (data: TooltipData | null) => void;
 }
 
-const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain }) => {
+const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [progress, setProgress] = useState(0);
+
+  // Entrance Animation
+  useEffect(() => {
+    setProgress(0);
+  }, [series]);
+
+  useFrame((state, delta) => {
+    if (progress < 1) {
+      // Animate progress from 0 to 1
+      setProgress(prev => Math.min(prev + delta * 1.5, 1));
+    }
+    
+    if (meshRef.current) {
+      // Cubic bezier ease out
+      const scaleY = d3.easeCubicOut(progress);
+      meshRef.current.scale.set(1, scaleY, 1);
+    }
+  });
+
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
     
@@ -69,10 +93,53 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
     return [...new Set(ticks)]; // unique
   }, [xDomain]);
 
+  const handlePointerMove = (e: any) => {
+    e.stopPropagation();
+    // Get the intersection point in local coordinates
+    // However, the mesh is scaled, so we need to be careful.
+    // The event point is in world coordinates.
+    // We can use the world point.
+    
+    // Convert world X to year
+    // The chart is centered at x=0 (via xScale range)
+    // xScale maps year -> x
+    // So we can invert: year = xScale.invert(x)
+    
+    // Since the group is at positionZ, and the camera is isometric,
+    // the x coordinate of the intersection point should be correct relative to the world origin.
+    // The group position is [0, 0, positionZ].
+    
+    const worldX = e.point.x;
+    const year = Math.round(xScale.invert(worldX));
+    
+    // Find the closest data point
+    const dataPoint = series.data.reduce((prev, curr) => {
+      return (Math.abs(curr.year - year) < Math.abs(prev.year - year) ? curr : prev);
+    });
+
+    onTooltip({
+      x: e.clientX,
+      y: e.clientY,
+      value: dataPoint.value,
+      year: dataPoint.year,
+      city: series.city,
+      visible: true
+    });
+  };
+
+  const handlePointerOut = () => {
+    onTooltip(null);
+  };
+
   return (
     <group position={[0, 0, positionZ]}>
       {/* The Area Chart Mesh */}
-      <mesh geometry={geometry}>
+      <mesh 
+        ref={meshRef}
+        geometry={geometry}
+        onPointerMove={handlePointerMove}
+        onPointerOut={handlePointerOut}
+      >
         <meshPhysicalMaterial
           color={series.color}
           transparent={true}
