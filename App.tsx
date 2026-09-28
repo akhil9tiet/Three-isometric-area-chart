@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Scene from './components/Scene';
 import UIOverlay from './components/UIOverlay';
 import { processData, getScales } from './utils/dataUtils';
@@ -9,6 +9,7 @@ const App: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [mode, setMode] = useState<'cities' | 'stocks'>('cities');
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [is2D, setIs2D] = useState(false);
   
   // Select dataset based on mode
   const rawData = mode === 'cities' ? COST_OF_LIVING_DATA : STOCK_DATA;
@@ -20,6 +21,7 @@ const App: React.FC = () => {
   // Handle Wheel Scroll (Desktop)
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      if (is2D) return;
       // If Ctrl is pressed, let the browser handle it (zoom or vertical page scroll)
       if (e.ctrlKey) return;
 
@@ -35,7 +37,7 @@ const App: React.FC = () => {
 
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);
-  }, [data.length]);
+  }, [data.length, is2D]);
 
   // Handle Touch Scroll (Mobile)
   useEffect(() => {
@@ -46,6 +48,7 @@ const App: React.FC = () => {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (is2D) return;
       // We prevent default to stop page scrolling and handle series navigation
       if (e.cancelable) e.preventDefault();
 
@@ -66,32 +69,24 @@ const App: React.FC = () => {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [data.length]);
+  }, [data.length, is2D]);
 
-  // Reset scroll when switching modes
+  // Reset navigation when switching datasets.
   useEffect(() => {
-    window.scrollTo(0, 0);
     setActiveIndex(0);
   }, [mode]);
 
-  // Keep the scroll height for the "page scroll" feeling if user Ctrl+Scrolls
-  const scrollHeight = `${Math.max(100, data.length * 100)}vh`;
-
   return (
-    <>
-      {/* The invisible scrollable container - kept for Ctrl+Scroll context */}
-      <div style={{ height: scrollHeight, width: '100%', position: 'absolute', top: 0, left: 0, zIndex: -1 }} />
-
-      {/* The Fixed Viewport */}
-      <div className="fixed inset-0 w-full h-full bg-slate-900 overflow-hidden touch-pan-y">
+      <div className={`app-shell ${is2D ? 'app-shell--2d' : ''}`}>
         
-        {/* 3D Scene Layer */}
-        <div className="absolute inset-0 z-0 touch-pan-y">
+        {/* Keep both layers mounted so their crossfade and depth animation share one timeline. */}
+        <div className="scene-layer">
           <Scene 
             data={data} 
             activeIndex={activeIndex} 
             scales={scales} 
             onTooltip={setTooltipData}
+            isExpanded={!is2D}
           />
         </div>
 
@@ -102,10 +97,11 @@ const App: React.FC = () => {
           currentMode={mode}
           onModeChange={setMode}
           tooltip={tooltipData}
+          is2D={is2D}
+          onViewChange={setIs2D}
         />
         
       </div>
-    </>
   );
 };
 

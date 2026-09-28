@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Line, Text } from '@react-three/drei';
 import { CitySeries, TooltipData } from '../types';
 import { CHART_CONFIG } from '../utils/dataUtils';
 import * as d3 from 'd3';
@@ -14,9 +14,10 @@ interface CityChartProps {
   yScale: any;
   xDomain: [number, number];
   onTooltip: (data: TooltipData | null) => void;
+  is2D: boolean;
 }
 
-const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip }) => {
+const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip, is2D }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [progress, setProgress] = useState(0);
 
@@ -34,7 +35,8 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
     if (meshRef.current) {
       // Cubic bezier ease out
       const scaleY = d3.easeCubicOut(progress);
-      meshRef.current.scale.set(1, scaleY, 1);
+      const scaleZ = THREE.MathUtils.damp(meshRef.current.scale.z, is2D ? 0.04 : 1, 4, delta);
+      meshRef.current.scale.set(1, scaleY, scaleZ);
     }
   });
 
@@ -92,6 +94,10 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
     if (ticks[ticks.length - 1] !== end) ticks.push(end);
     return [...new Set(ticks)]; // unique
   }, [xDomain]);
+  const linePoints = useMemo(() => {
+    const curve = new THREE.SplineCurve(series.data.map(point => new THREE.Vector2(xScale(point.year), yScale(point.value))));
+    return curve.getPoints(Math.max(64, series.data.length * 12)).map(point => [point.x, point.y, CHART_CONFIG.extrusionDepth + 0.25] as [number, number, number]);
+  }, [series.data, xScale, yScale]);
 
   const handlePointerMove = (e: any) => {
     e.stopPropagation();
@@ -140,7 +146,7 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
         onPointerMove={handlePointerMove}
         onPointerOut={handlePointerOut}
       >
-        <meshPhysicalMaterial
+        {!is2D ? <meshPhysicalMaterial
           color={series.color}
           transparent={true}
           opacity={0.6}
@@ -152,17 +158,19 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
           emissiveIntensity={isActive ? 2.5 : 0.0}
           toneMapped={false}
           side={THREE.DoubleSide}
-        />
+        /> : <meshBasicMaterial color={series.color} transparent opacity={0.18} depthWrite={false} side={THREE.DoubleSide} />}
       </mesh>
+
+      {is2D && <Line points={linePoints} color={series.color} lineWidth={1.5} />}
 
       {/* Grid line at the bottom for reference */}
-      <mesh position={[0, -0.05, CHART_CONFIG.extrusionDepth / 2]} rotation={[-Math.PI / 2, 0, 0]}>
+      {!is2D && <mesh position={[0, -0.05, CHART_CONFIG.extrusionDepth / 2]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[CHART_CONFIG.width + 4, 0.1]} />
         <meshBasicMaterial color="#334155" opacity={0.3} transparent />
-      </mesh>
+      </mesh>}
 
       {/* City/Company Label floating in 3D space */}
-      <Text
+      {!is2D && <Text
         position={[-CHART_CONFIG.width / 2 - 1.5, 1, 0]}
         rotation={[0, Math.PI / 6, 0]}
         fontSize={0.8}
@@ -173,10 +181,10 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
         outlineColor={series.color}
       >
         {series.city}
-      </Text>
+      </Text>}
       
       {/* Year markers on the chart floor */}
-      {isActive && (
+      {!is2D && isActive && (
         <group position={[0, -0.5, CHART_CONFIG.extrusionDepth]}>
           {ticks.map(year => (
             <Text
