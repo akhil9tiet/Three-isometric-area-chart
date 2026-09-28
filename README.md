@@ -1,20 +1,35 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Data Atlas
 
-# Run and deploy your AI Studio app
+An interactive area chart for comparing historical cost of living across US cities and illustrative technology stock prices.
 
-This contains everything you need to run your app locally.
+## Views and controls
 
-View your app in AI Studio: https://ai.studio/apps/2568e58e-5bf8-46ba-a40c-6095098ad169
+- Switch between the Cities and Stocks datasets in the header.
+- In 3D view, scroll to navigate through the series.
+- Turn on 2D view to collapse the series into an overlapping, front-facing area chart with axes and a color legend.
+- Hover over a series in 2D view to see its value for the nearest year.
 
-## Run Locally
+## Requirements
 
-**Prerequisites:**  Node.js
+- Node.js 24 or newer (through Node.js 26)
+- npm
 
+## Run locally
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```sh
+npm install
+npm run dev
+```
+
+Vite prints the local development URL in the terminal.
+
+## Build
+
+```sh
+npm run build
+npm run preview
+```
+
+## Data
+
+Edit `COST_OF_LIVING_DATA` and `STOCK_DATA` in `constants.ts` to change the sample data. Stock values are illustrative and are not investment data.
