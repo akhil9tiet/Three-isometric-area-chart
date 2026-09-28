@@ -2,6 +2,8 @@
 
 An interactive area chart for comparing historical cost of living across US cities and illustrative technology stock prices.
 
+When GitHub Pages is enabled, the site is published at <https://akhil9tiet.github.io/Three-isometric-area-chart/>.
+
 ## Views and controls
 
 - Switch between the Cities and Stocks datasets in the header.
