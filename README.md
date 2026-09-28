@@ -4,6 +4,10 @@ An interactive area chart for comparing historical cost of living across US citi
 
 When GitHub Pages is enabled, the site is published at <https://akhil9tiet.github.io/Three-isometric-area-chart/>.
 
+## Enable GitHub Pages
+
+For the first deployment, open the repository's **Settings > Pages** and set **Build and deployment > Source** to **GitHub Actions**. Then run the `Deploy to GitHub Pages` workflow from the Actions tab, or push a commit to `main`.
+
 ## Views and controls
 
 - Switch between the Cities and Stocks datasets in the header.
