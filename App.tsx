@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<'cities' | 'stocks'>('cities');
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
   const [is2D, setIs2D] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   
   // Select dataset based on mode
   const rawData = mode === 'cities' ? COST_OF_LIVING_DATA : STOCK_DATA;
@@ -77,7 +78,7 @@ const App: React.FC = () => {
   }, [mode]);
 
   return (
-      <div className={`app-shell ${is2D ? 'app-shell--2d' : ''}`}>
+      <div className={`app-shell app-shell--${theme} ${is2D ? 'app-shell--2d' : ''}`}>
         
         {/* Keep both layers mounted so their crossfade and depth animation share one timeline. */}
         <div className="scene-layer">
@@ -87,6 +88,7 @@ const App: React.FC = () => {
             scales={scales} 
             onTooltip={setTooltipData}
             isExpanded={!is2D}
+            theme={theme}
           />
         </div>
 
@@ -99,6 +101,8 @@ const App: React.FC = () => {
           tooltip={tooltipData}
           is2D={is2D}
           onViewChange={setIs2D}
+          theme={theme}
+          onThemeChange={setTheme}
         />
         
       </div>

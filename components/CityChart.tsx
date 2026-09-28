@@ -15,9 +15,10 @@ interface CityChartProps {
   xDomain: [number, number];
   onTooltip: (data: TooltipData | null) => void;
   is2D: boolean;
+  theme: 'dark' | 'light';
 }
 
-const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip, is2D }) => {
+const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip, is2D, theme }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [progress, setProgress] = useState(0);
 
@@ -174,7 +175,7 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
         position={[-CHART_CONFIG.width / 2 - 1.5, 1, 0]}
         rotation={[0, Math.PI / 6, 0]}
         fontSize={0.8}
-        color={isActive ? "white" : "#64748b"}
+        color={isActive ? (theme === 'dark' ? '#ffffff' : '#252a30') : (theme === 'dark' ? '#94a3b8' : '#69727c')}
         anchorX="right"
         anchorY="middle"
         outlineWidth={isActive ? 0.05 : 0}
@@ -192,7 +193,7 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
               position={[xScale(year), 0, 0]}
               rotation={[-Math.PI / 2, 0, 0]}
               fontSize={0.3}
-              color="#cbd5e1"
+              color={theme === 'dark' ? '#cbd5e1' : '#5f6873'}
               anchorX="center"
               anchorY="top"
             >

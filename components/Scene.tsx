@@ -22,6 +22,7 @@ interface SceneProps {
   };
   onTooltip: (data: TooltipData | null) => void;
   isExpanded: boolean;
+  theme: 'dark' | 'light';
 }
 
 const AnimatedGroup: React.FC<{ 
@@ -30,7 +31,8 @@ const AnimatedGroup: React.FC<{
   scales: SceneProps['scales'];
   onTooltip: (data: TooltipData | null) => void;
   isExpanded: boolean;
-}> = ({ data, activeIndex, scales, onTooltip, isExpanded }) => {
+  theme: 'dark' | 'light';
+}> = ({ data, activeIndex, scales, onTooltip, isExpanded, theme }) => {
   const groupRef = useRef<THREE.Group>(null);
   const spread = useRef(isExpanded ? 1 : 0);
   
@@ -54,6 +56,7 @@ const AnimatedGroup: React.FC<{
             series={series}
             positionZ={0}
             is2D={!isExpanded}
+            theme={theme}
             isActive={Math.abs(activeIndex - index) < 0.5}
             xScale={scales.xScale}
             yScale={scales.yScale}
@@ -119,12 +122,12 @@ const AnimatedCamera: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
   />;
 };
 
-const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isExpanded }) => {
+const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isExpanded, theme }) => {
   return (
     <Canvas shadows dpr={[1, 2]}>
       <AnimatedCamera isExpanded={isExpanded} />
 
-      <color attach="background" args={['#0f172a']} />
+      <color attach="background" args={[theme === 'dark' ? '#292b2e' : '#f1f2f3']} />
       
       {/* Lighting */}
       <ambientLight intensity={0.2} />
@@ -144,9 +147,10 @@ const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isE
         scales={scales} 
         onTooltip={onTooltip} 
         isExpanded={isExpanded}
+        theme={theme}
       />
 
-      {!isExpanded && <FrontAxes scales={scales} />}
+      {!isExpanded && <FrontAxes scales={scales} theme={theme} />}
       
       {/* Post Processing for Glow */}
       <EffectComposer enableNormalPass={false}>
@@ -162,8 +166,8 @@ const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isE
       {isExpanded && <Grid
         position={[0, -0.1, 0]} 
         args={[40, 100]} 
-        cellColor="#1e293b" 
-        sectionColor="#334155" 
+        cellColor={theme === 'dark' ? '#3a3c40' : '#dfe2e5'}
+        sectionColor={theme === 'dark' ? '#505258' : '#c6cbd0'}
         fadeDistance={60}
         infiniteGrid
       />}
@@ -171,7 +175,7 @@ const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isE
   );
 };
 
-const FrontAxes: React.FC<{ scales: SceneProps['scales'] }> = ({ scales }) => {
+const FrontAxes: React.FC<{ scales: SceneProps['scales']; theme: 'dark' | 'light' }> = ({ scales, theme }) => {
   const xStart = scales.xDomain[0];
   const xEnd = scales.xDomain[1];
   const yMax = scales.yDomain[1];
@@ -181,19 +185,22 @@ const FrontAxes: React.FC<{ scales: SceneProps['scales'] }> = ({ scales }) => {
   const right = scales.xScale(xEnd);
   const baseline = scales.yScale(0);
   const front = 0.8;
+  const axisColor = theme === 'dark' ? '#aeb5bf' : '#737b85';
+  const gridColor = theme === 'dark' ? '#42454a' : '#d3d7db';
+  const labelColor = theme === 'dark' ? '#b6bdc7' : '#626a74';
 
   return <group>
     {yTicks.map(value => <group key={`y-${value}`}>
-      <Line points={[[left, scales.yScale(value), front], [right, scales.yScale(value), front]]} color={value === 0 ? '#8b9ab0' : '#344258'} lineWidth={value === 0 ? 1.4 : 0.8} />
-      <Text position={[left - 0.28, scales.yScale(value), front]} fontSize={0.22} color="#a3b0c2" anchorX="right" anchorY="middle">{value}</Text>
+      <Line points={[[left, scales.yScale(value), front], [right, scales.yScale(value), front]]} color={value === 0 ? axisColor : gridColor} lineWidth={value === 0 ? 1.4 : 0.8} />
+      <Text position={[left - 0.28, scales.yScale(value), front]} fontSize={0.22} color={labelColor} anchorX="right" anchorY="middle">{value}</Text>
     </group>)}
     {xTicks.map(year => <group key={`x-${year}`}>
-      <Line points={[[scales.xScale(year), baseline, front], [scales.xScale(year), baseline - 0.12, front]]} color="#8b9ab0" lineWidth={1} />
-      <Text position={[scales.xScale(year), baseline - 0.36, front]} fontSize={0.22} color="#a3b0c2" anchorX="center" anchorY="top">{year}</Text>
+      <Line points={[[scales.xScale(year), baseline, front], [scales.xScale(year), baseline - 0.12, front]]} color={axisColor} lineWidth={1} />
+      <Text position={[scales.xScale(year), baseline - 0.36, front]} fontSize={0.22} color={labelColor} anchorX="center" anchorY="top">{year}</Text>
     </group>)}
-    <Line points={[[left, baseline, front], [left, scales.yScale(yMax), front]]} color="#8b9ab0" lineWidth={1.4} />
-    <Text position={[(left + right) / 2, baseline - 0.7, front]} fontSize={0.25} color="#c0cada" anchorX="center" anchorY="middle">Year</Text>
-    <Text position={[left - 0.78, scales.yScale(yMax) / 2, front]} rotation={[0, 0, Math.PI / 2]} fontSize={0.25} color="#c0cada" anchorX="center" anchorY="middle">Value</Text>
+    <Line points={[[left, baseline, front], [left, scales.yScale(yMax), front]]} color={axisColor} lineWidth={1.4} />
+    <Text position={[(left + right) / 2, baseline - 0.7, front]} fontSize={0.25} color={labelColor} anchorX="center" anchorY="middle">Year</Text>
+    <Text position={[left - 0.78, scales.yScale(yMax) / 2, front]} rotation={[0, 0, Math.PI / 2]} fontSize={0.25} color={labelColor} anchorX="center" anchorY="middle">Value</Text>
   </group>;
 };
 
