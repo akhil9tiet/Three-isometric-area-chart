@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrthographicCamera, Environment, Grid, Line, Text } from '@react-three/drei';
+import { OrthographicCamera, Grid, Line, Text } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import CityChart from './CityChart';
@@ -124,22 +124,15 @@ const AnimatedCamera: React.FC<{ isExpanded: boolean }> = ({ isExpanded }) => {
 
 const Scene: React.FC<SceneProps> = ({ data, activeIndex, scales, onTooltip, isExpanded, theme }) => {
   return (
-    <Canvas shadows dpr={[1, 2]}>
+    <Canvas dpr={[1, 1.5]}>
       <AnimatedCamera isExpanded={isExpanded} />
 
       <color attach="background" args={[theme === 'dark' ? '#292b2e' : '#f1f2f3']} />
       
       {/* Lighting */}
       <ambientLight intensity={0.2} />
-      <directionalLight 
-        position={[10, 20, 5]} 
-        intensity={0.8} 
-        castShadow 
-      />
+      <directionalLight position={[10, 20, 5]} intensity={0.8} />
       <pointLight position={[-10, 5, 10]} intensity={0.5} color="#ffffff" />
-
-      {/* Environment reflections */}
-      <Environment preset="city" />
 
       <AnimatedGroup 
         data={data} 

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { Line, Text } from '@react-three/drei';
@@ -20,22 +20,15 @@ interface CityChartProps {
 
 const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xScale, yScale, xDomain, onTooltip, is2D, theme }) => {
   const meshRef = useRef<THREE.Mesh>(null);
-  const [progress, setProgress] = useState(0);
-
-  // Entrance Animation
-  useEffect(() => {
-    setProgress(0);
-  }, [series]);
+  const progress = useRef(0);
 
   useFrame((state, delta) => {
-    if (progress < 1) {
-      // Animate progress from 0 to 1
-      setProgress(prev => Math.min(prev + delta * 1.5, 1));
-    }
-    
     if (meshRef.current) {
+      // Keep the entrance animation in Three.js. Updating React state here
+      // would rerender every chart on every frame during startup.
+      progress.current = Math.min(progress.current + delta * 1.5, 1);
       // Cubic bezier ease out
-      const scaleY = d3.easeCubicOut(progress);
+      const scaleY = d3.easeCubicOut(progress.current);
       const scaleZ = THREE.MathUtils.damp(meshRef.current.scale.z, is2D ? 0.04 : 1, 4, delta);
       meshRef.current.scale.set(1, scaleY, scaleZ);
     }
@@ -206,4 +199,4 @@ const CityChart: React.FC<CityChartProps> = ({ series, positionZ, isActive, xSca
   );
 };
 
-export default CityChart;
+export default React.memo(CityChart);
