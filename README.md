@@ -2,6 +2,9 @@
 
 An interactive area chart for comparing historical cost of living across US cities and illustrative technology stock prices.
 
+![Data Atlas demo](./assets/threeChartDemo.gif)
+
+
 When GitHub Pages is enabled, the site is published at <https://akhil9tiet.github.io/Three-isometric-area-chart/>.
 
 ## Enable GitHub Pages
