@@ -1,4 +1,6 @@
-# Data Atlas
+# Three Isometric Charts
+
+# [Live Demo](https://akhil9tiet.github.io/Three-isometric-area-chart/)
 
 <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGhwbmxkY3o4NHBvcmVqYmdrYng1NGtkOGo2Y2NjbmUwZ2tpaTVzdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lzp81zPBOjm1fZTAWY/giphy.gif" width="480" height="416" alt="Demo GIF">
 
