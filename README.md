@@ -1,11 +1,9 @@
 # Data Atlas
 
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGhwbmxkY3o4NHBvcmVqYmdrYng1NGtkOGo2Y2NjbmUwZ2tpaTVzdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lzp81zPBOjm1fZTAWY/giphy.gif" width="480" height="416" alt="Demo GIF">
+
+
 An interactive area chart for comparing historical cost of living across US cities and illustrative technology stock prices.
-
-![Data Atlas demo](./assets/threeChartDemo.gif)
-
-
-When GitHub Pages is enabled, the site is published at <https://akhil9tiet.github.io/Three-isometric-area-chart/>.
 
 ## Enable GitHub Pages
 
